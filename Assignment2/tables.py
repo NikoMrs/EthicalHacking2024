@@ -10,13 +10,13 @@ def random_string(length):
 base_url = 'http://cyberchallenge.disi.unitn.it:50050'
 
 aux_username = random_string(20)
-auxpassword = random_string(20)
+aux_password = random_string(20)
 
-signup_body = {'username' : aux_username, 'password': auxpassword, 'confirm-password': auxpassword}
+signup_body = {'username' : aux_username, 'password': aux_password, 'confirm-password': aux_password}
 r = requests.post(base_url+'/register', signup_body)
-print(f"Created new account: {aux_username} - {auxpassword}")
+print(f"Created new account: {aux_username} - {aux_password}")
 
-login_body = {'username': aux_username, 'password': auxpassword}
+login_body = {'username': aux_username, 'password': aux_password}
 r = requests.post(base_url+'/login', login_body)
 
 invalid_login = '<div class="flash-message error">'
