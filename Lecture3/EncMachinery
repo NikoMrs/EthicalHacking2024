@@ -1,0 +1,20 @@
+import pwn
+from Crypto.Cipher import AES
+from Crypto.Hash import MD5
+
+conn = pwn.remote("cyberchallenge.disi.unitn.it", 10003)
+
+conn.recvuntil(b": ")
+flag_encrypted = conn.recvline(keepends=False).decode()
+flag_encrypted = bytes.fromhex(flag_encrypted)
+print(f"flag_encrypted: {flag_encrypted}")
+
+crafted_msg = b"UniTN{"
+crafted_msg = crafted_msg.hex().encode()
+conn.sendlineafter("? ", crafted_msg)
+
+print(conn.recvline())
+
+conn.recvuntil(b": ")
+crypted_msg = conn.recvline()
+print(crypted_msg)
