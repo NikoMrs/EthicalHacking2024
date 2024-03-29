@@ -13,6 +13,9 @@ else:
 
 BLOCK_SIZE = 16
 KEY = os.urandom(BLOCK_SIZE)
+print(KEY)
+KEY = b'\xd17\xe0\x86\x92\xebg\x1eT?\x9f\xe4^\xdd\x00]'
+print(KEY)
 ALLOWED_CHARACTERS = string.ascii_letters + " .,;?!'\""
 
 def sanitize(s):
@@ -34,10 +37,14 @@ def signup():
     if not sanitize(username) or not sanitize(description):
         return
 
+    print("length: ", len(f"desc={description}&user={username}"))
     token = f"desc={description}&user={username}".encode()
+    print("encoded length: ", len(token))
+
     padded_token = pad(token, BLOCK_SIZE)
 
     iv = os.urandom(BLOCK_SIZE)
+    iv = b'0ab566abf1a90a80'
     cipher = AES.new(key=KEY, mode=AES.MODE_CBC, iv=iv)
     enc_token = cipher.encrypt(padded_token)
     print("Here's your token (hex):", iv.hex() + enc_token.hex())
@@ -64,7 +71,7 @@ def login():
         if username == b"admin" and description == b"I am a boss":
             print(FLAG)
         else:
-            print("Welcome back", username.decode())
+            print("Welcome back", username.decode(), " ", description.decode())
     except (ValueError, IndexError):
         print("Nope")
 

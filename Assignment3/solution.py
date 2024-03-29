@@ -66,8 +66,8 @@ else:
     conn = pwn.process(['python3', 'challenge.py'])
 
 
-line = conn.recvuntil(b'> ')            # Intro msg
-debug(line)
+#line = conn.recvuntil(b'> ')            # Intro msg
+#debug(line)
 
 username = b'Nicola'
 description = b'Test'
