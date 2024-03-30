@@ -25,9 +25,11 @@ def xor_strings(str1, str2):
     return str(result, 'utf-8')
 
 def xor_bytearray(bytearray1, bytearray2):
+    #print("XOR:", bytearray1, bytearray2)
     result = bytearray()
     for byte1, byte2 in zip(bytearray1, bytearray2):
         result.append(byte1 ^ byte2)
+        #print(result)
 
     return result
 
@@ -42,6 +44,7 @@ def login(iv_enc_token):
         cipher = AES.new(key=KEY, mode=AES.MODE_CBC, iv=iv)
         padded_token = cipher.decrypt(enc_token)
         token = unpad(padded_token, BLOCK_SIZE)
+        print("token inside login function", token)
 
         parts = token.split(b"&")
         username = None
@@ -107,30 +110,42 @@ for i in range(len(initial_plaintext_parts)):
 
 # Aggiungo agli array di bytearry l'iv  --> Dimensione di 5 Blocchi
 
-initial_plaintext_parts_bytes[0] = bytearray(iv, 'utf-8')
-final_plaintext_parts_bytes[0] = bytearray(iv, 'utf-8')
-new_token = bytearray(iv, 'utf-8')
+initial_plaintext_parts_bytes[0] = bytearray(iv.encode())
+final_plaintext_parts_bytes[0] = bytearray(iv.encode())
 
 
-print("Token", token_parts_bytes)
-print("Plaintext iniziale", initial_plaintext_parts_bytes)
-print("Plaintext desiderato", final_plaintext_parts_bytes)
+new_token = bytearray(iv.encode())
+
+# print("Token", token_parts_bytes)
+# print("Plaintext iniziale", initial_plaintext_parts_bytes)
+# print("Plaintext desiderato", final_plaintext_parts_bytes)
 
 final_ciphertext_parts_bytes = token_parts_bytes
 for i in range(2,-1,-1):
 
-    final_plaintext = final_plaintext_parts[i]              # Pi'
-    initial_plaintext = initial_plaintext_parts[i]          # Pi
-    if(i == 0):                                             # Ci-1
-        initial_ciphertext = iv
+    # final_plaintext = final_plaintext_parts[i]              # Pi'
+    # initial_plaintext = initial_plaintext_parts[i]          # Pi
+    # if(i == 0):                                             # Ci-1
+    #     initial_ciphertext = iv
+    # else:
+    #     initial_ciphertext = token_parts[i-1]                 
+
+    # print(f"Block #{i}:", f"FinalPlain: {final_plaintext_parts_bytes[i]}, \
+    #       InitialPlain: {initial_plaintext_parts_bytes[i]}, InitialChiper: {token_parts_bytes[i-1]}")
+
+    #final_ciphertext[i] = xor_strings(xor_strings(initial_plaintext, initial_ciphertext), final_plaintext)
+    if(i == 0):
+        print("New Token", new_token)
+        print("Plaintext", initial_plaintext_parts_bytes[i])
+        aux = xor_bytearray(initial_plaintext_parts_bytes[i], new_token)
     else:
-        initial_ciphertext = token_parts[i-1]                   
+        aux = xor_bytearray(initial_plaintext_parts_bytes[i], token_parts_bytes[i-1])
 
-    print(f"Block #{i}:", f"FinalPlain: {final_plaintext}, InitialPlain: {initial_plaintext}, InitialChiper: {initial_ciphertext}")
-
-    #final_ciphertext[i] = xor_strings(xor_strings(initial_plaintext, initial_ciphertext), final_plaintext) 
-    final_ciphertext_parts_bytes[i] = xor_bytearray(xor_bytearray(initial_plaintext_parts_bytes[i], token_parts_bytes[i-1]), final_plaintext_parts_bytes[i])  
-    print(f"Block #{i}:", final_ciphertext_parts_bytes)
+    print(f"aux {i}:", aux.hex())
+    aux = bytearray(aux.hex(), 'utf-8')
+    print(f"aux hex {i}:", aux)
+    final_ciphertext_parts_bytes[i-1] = bytearray(xor_bytearray(aux, final_plaintext_parts_bytes[i]).hex(), 'utf-8')
+    print(f"Block #{i}:", final_ciphertext_parts_bytes[i])
 
 
 #desired_plaintext = "&user=ad"                     # Pi'
