@@ -13,9 +13,9 @@ else:
 
 BLOCK_SIZE = 16
 KEY = os.urandom(BLOCK_SIZE)
-print(KEY)
+#print(KEY)
 KEY = b'\xd17\xe0\x86\x92\xebg\x1eT?\x9f\xe4^\xdd\x00]'
-print(KEY)
+#print(KEY)
 ALLOWED_CHARACTERS = string.ascii_letters + " .,;?!'\""
 
 def sanitize(s):
@@ -37,9 +37,9 @@ def signup():
     if not sanitize(username) or not sanitize(description):
         return
 
-    print("length: ", len(f"desc={description}&user={username}"))
+    #print("length: ", len(f"desc={description}&user={username}"))
     token = f"desc={description}&user={username}".encode()
-    print("encoded length: ", len(token))
+    #print("encoded length: ", len(token))
 
     padded_token = pad(token, BLOCK_SIZE)
 
