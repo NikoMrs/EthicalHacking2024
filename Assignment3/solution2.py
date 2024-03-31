@@ -4,7 +4,7 @@ REMOTE = False
 DEBUG = True
 
 IP_ADDRESS = "cyberchallenge.disi.unitn.it"
-PORT = 50300
+PORT = 50301
 
 def xor(hex1, hex2):
     int_value1 = int(hex1, 16)
