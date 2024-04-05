@@ -63,55 +63,38 @@ def signup(username, description):
     return(iv.hex() + enc_token.hex())
 
 
-#full_token = "3061623536366162663161393061383068e5c886f0163b3a71c2cb519368346f3c4c14dd341226c1725246bee5c8331741535ce38b7dcaded93f618b086b1433"
-#print(full_token)
-full_token = signup("?????........++++++++I am a boss", "........") 
-print(full_token)
+
+full_token = signup("?????........!!!!!!!!I am a boss", "........")     # 1st parameter is the username, 2nd is the description
+# With this input we only need to properly change the 5th, 2nd and 1st block.
+# The last 2 blocks should be unchanged, while the 3rd and 4th will get dirty without compromising the attack
 
 # Setup Attack
-initial_plaintext = ("desc=........&user=?????........++++++++I am a boss").encode().hex()
-# desc=... - .....&us - er=????? - ........ - ++++++++ - I am a b - oss
-final_plaintext =   ("user=admin&********________****---&desc=I am a boss").encode().hex()
-# user=adm - in&***** - ***_____ - ___****- - --&desc= - I am a b - oss
+initial_plaintext = ("desc=........&user=?????........!!!!!!!!I am a boss").encode().hex()
+# desc=... - .....&us - er=????? - ........ - !!!!!!!! - I am a b - oss         P  Blocks
+final_plaintext =   ("user=admin&********________*******&desc=I am a boss").encode().hex()
+# user=adm - in&***** - ***_____ - ___***** - **&desc= - I am a b - oss         P' Blocks
 
-token_parts = [full_token[i:i+16]for i in range(0, len(full_token), 16)]
-initial_plaintext_parts = [initial_plaintext[i:i+16]for i in range(0, len(initial_plaintext), 16)]
+token_parts = [full_token[i:i+16]for i in range(0, len(full_token), 16)]                                # Divide in blokcs
+initial_plaintext_parts = [initial_plaintext[i:i+16]for i in range(0, len(initial_plaintext), 16)]      
 initial_plaintext_parts.insert(0, token_parts[0])                                                       # Add IV
 final_plaintext_parts = [final_plaintext[i:i+16]for i in range(0, len(final_plaintext), 16)]
 final_plaintext_parts.insert(0, token_parts[0])                                                         # Add IV
-
-print(token_parts)
-print(initial_plaintext_parts)
-print(final_plaintext_parts)
-
 
 # Modify Chipertext
 final_chipertext_parts = [None] * (len(token_parts))
 for i in range(len(token_parts)):
     final_chipertext_parts[i] = token_parts[i]
 
-#print(f"Xor of : {initial_plaintext_parts[2]}, {token_parts[1]}, {final_plaintext_parts[2]}")
-#final_chipertext_parts[1] = xor(xor(initial_plaintext_parts[2], token_parts[1]), final_plaintext_parts[2])
-#print(f"Xor of : {initial_plaintext_parts[1]}, {token_parts[0]}, {final_plaintext_parts[1]}")
-#final_chipertext_parts[0] = xor(xor(initial_plaintext_parts[1], token_parts[0]), final_plaintext_parts[1])
-
-# i is the block we'll change
-i = 4
+i = 4       # i = 4 will change the plaintext block containing !!!!!!!!
 final_chipertext_parts[i] = xor(xor(initial_plaintext_parts[i+1], token_parts[i]), final_plaintext_parts[i+1])
-#print(len(final_chipertext_parts[i]))
-#print(f"Xor of : {initial_plaintext_parts[i+1]}, {token_parts[i]}, {final_plaintext_parts[i+1]}")
-#print(final_chipertext_parts[i])
-i = 1
-final_chipertext_parts[i] = xor(xor(initial_plaintext_parts[i+1], token_parts[i]), final_plaintext_parts[i+1])
-#print(len(final_chipertext_parts[i]))
-i = 0
-final_chipertext_parts[i] = xor(xor(initial_plaintext_parts[i+1], token_parts[i]), final_plaintext_parts[i+1])
-#print(len(final_chipertext_parts[i]))
+i = 1       # i = 4 will change the plaintext block containing .....&us
+#final_chipertext_parts[i] = xor(xor(initial_plaintext_parts[i+1], token_parts[i]), final_plaintext_parts[i+1])
+i = 0       # i = 4 will change the plaintext block containing desc=...
+#final_chipertext_parts[i] = xor(xor(initial_plaintext_parts[i+1], token_parts[i]), final_plaintext_parts[i+1])
 
 final_chipertext = ""
 for i in range(len(final_chipertext_parts)):
     final_chipertext = final_chipertext + final_chipertext_parts[i]
-#print(final_chipertext)
 
 print("Old", full_token)
 print("New", final_chipertext)

@@ -1,0 +1,28 @@
+Cosa voglio
+	desc=I a    m a boss     &user=admin
+
+Come lo ottengo
+	user=adm    in&desc=     I am a boss
+
+Cosa inserisco
+	desc=&us    er=admin     I am a boss
+	
+	desc=
+	user=?????I am a boss
+	
+	
+-------------------------------------------------------------------------------------
+	
+	
+full_token = signup("?????I am a boss?????********", "")
+initial_plaintext = ("desc=&user=?????I am a boss?????********").encode().hex()
+final_plaintext = ("user=admin&desc=I zz a boss!!!!!........").encode().hex()
+
+i = 4
+final_chipertext_parts[i] = xor(xor(initial_plaintext_parts[i+1], token_parts[i]), final_plaintext_parts[i+1])
+i = 1
+final_chipertext_parts[i] = xor(xor(initial_plaintext_parts[i+1], token_parts[i]), final_plaintext_parts[i+1])
+i = 0
+final_chipertext_parts[i] = xor(xor(initial_plaintext_parts[i+1], token_parts[i]), final_plaintext_parts[i+1])
+
+
