@@ -3,15 +3,15 @@ from Crypto.Util.number import long_to_bytes, bytes_to_long
 import sys
 sys.set_int_max_str_digits(50000)
 
-REMOTE = False
+REMOTE = True
 
 IP_ADDRESS = "cyberchallenge.disi.unitn.it"
-PORT = 50302
+PORT = 50303
 
 if(REMOTE):
     conn = pwn.remote(IP_ADDRESS, PORT)
 else:
-    conn = pwn.process(['python3', 'challenge1.py'])
+    conn = pwn.process(['python3', 'challenge2.py'])
 
 # Retrieve the encrypted Flag c = t^e mod n
 conn.recvuntil(b":")
@@ -54,7 +54,5 @@ print("M: ", m)
 
 # Compute t from m
 t = m // g
-print("Flag: ", t)
-print(long_to_bytes(t))
-
-conn.interactive()
+print("T: ", t)
+print("Flag: ", long_to_bytes(t).decode())
