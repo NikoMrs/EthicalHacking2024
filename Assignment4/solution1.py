@@ -52,7 +52,8 @@ m = int(conn.recvline(keepends=False).decode())
 
 print("M: ", m)
 
-# Compute s from m
+# Compute s from m. Notice how we use // (rather than / followed
+# by a cast) in order to get a higher precision in the division
 s = m // betha
 print("S: ", s)
 print("Flag: ", long_to_bytes(s).decode())
