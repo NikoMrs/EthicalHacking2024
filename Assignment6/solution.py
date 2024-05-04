@@ -1,9 +1,9 @@
 import pwn
+from randcrack import RandCrack
+rc = RandCrack()
 
 from ctypes import CDLL
 libc = CDLL("libc.so.6")
-
-from Crypto.Util.number import long_to_bytes, bytes_to_long
 
 REMOTE = True
 
@@ -12,27 +12,42 @@ PORT = 50150
 
 if(REMOTE):
     conn = pwn.remote(IP_ADDRESS, PORT)
-else:
-    conn = pwn.process(['python3', 'challenge1.py'])
 
-currentTime = libc.time(0)
-
-libc.srand(currentTime)
-
-psw = [None]*16
-for i in range(len(psw)):
-    randNum = libc.rand()
-    psw[i] = randNum % 0x5e + ord('!')
-
-print(psw)
-
-fullPsw = ""
-for i in range(len(psw)):
-    fullPsw = fullPsw + chr(psw[i])
-
-print(fullPsw)
-
+# Retrieve first Password
 conn.recvuntil(b":")
-conn.sendline(fullPsw.encode())
+conn.sendline(b"1")
 
-conn.interactive()
+conn.recvuntil(b": ")
+firstPsw = conn.recvline(keepends=False).decode()
+print(f"First Password: {firstPsw}")
+
+index = 0
+for i in range(32768):              # Iterate from 0 to (Default) Max PID possibile in Linux
+
+    print(f"Tentativo {i}")
+    libc.srand(i)                   # Initiate srand with seed equal to selected PID
+
+    myPsw = ""                      # Create psw following disassembled code
+    for j in range(16):
+        randNum = libc.rand()
+        myPsw += chr(randNum % 0x5e + ord('!'))
+
+    print(myPsw)
+
+    if(myPsw == firstPsw):          # Check if myPsw is equal to the one received
+        index = i
+        break
+    
+secondPsw = ""                      # Create another psw using the same seed
+for i in range(16):
+    randNum = libc.rand()
+    secondPsw += chr(randNum % 0x5e + ord('!'))
+    
+conn.recvuntil(b":")                # Send second psw and retrieve the flag
+conn.sendline(secondPsw.encode())
+
+conn.recvuntil(b":\n")
+flag = (conn.recvline(keepends=False)).decode()
+print(f"Flag: {flag}")
+
+conn.close()
