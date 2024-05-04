@@ -1,7 +1,4 @@
 import pwn
-from randcrack import RandCrack
-rc = RandCrack()
-
 from ctypes import CDLL
 libc = CDLL("libc.so.6")
 
