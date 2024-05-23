@@ -1,6 +1,6 @@
 from pwn import *
 
-REMOTE = False
+REMOTE = True
 
 IP_ADDRESS = "cyberchallenge.disi.unitn.it"
 PORT = 50230
